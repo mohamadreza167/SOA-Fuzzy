@@ -1,0 +1,32 @@
+function [S,DEAD,Energy]=preparation_next_round(S,nodes,r,init_energy)
+global HND
+global FND
+global sink
+en=0;
+dead=0;
+for i=1:1:nodes
+    S(i).Receive_Packet = 0;
+    S(i).ReceivedPacket = 0;
+    S(i).SendPacket = 0;
+    S(i).dist_BS=distancee(S(i),sink);
+    S(i).dist_CH=S(i).dist_BS;
+    S(i).CH=nodes+1;
+    S(i).type='normal';
+    if S(i).E<=0
+        S(i).E=0;
+        dead=dead+1;
+        S(i).type='dead';
+    end
+    if dead==1 && FND==-1
+        FND=r;
+    end
+    if dead>=nodes/2 && HND==-1
+        HND=r;
+    end
+    %if S(i).E>0
+        en=en+(init_energy-S(i).E);
+    %end
+end
+DEAD=dead;
+Energy=en;
+end
