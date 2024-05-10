@@ -1,0 +1,3 @@
+function dist=distancee(A,B)
+dist=sqrt((A.xd+B.xd)^2+(A.yd-B.yd)^2);
+end
