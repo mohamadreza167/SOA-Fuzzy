@@ -1,0 +1,5 @@
+function angle_deg=Angle_Calculation(A,B)
+dx = B.xd - A.xd;
+dy = B.yd - A.yd;
+angle_rad = atan2(dy, dx);
+angle_deg = angle_rad * (180/pi);
