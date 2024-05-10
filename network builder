@@ -1,0 +1,29 @@
+function [S]=networkbuilder(nodes,network,init_energy,sink,location)
+global Rc
+figure (1);
+hold off
+plot(sink.xd,sink.yd,'k+');
+hold on
+for i=1:1:nodes
+    S(i).xd=location(i,1);
+    S(i).yd=location(i,2);
+    S(i).E=init_energy;
+    S(i).type='normal';
+    S(i).dist_BS=distancee(S(i),sink);
+    S(i).dist_CH=S(i).dist_BS;
+    S(i).CH=nodes+1;
+    S(i).Rc = Rc;
+    S(i).Head_in_round=-1000;
+    S(i).Receive_Packet = 0;
+    S(i).ReceivedPacket = 0;
+    S(i).SendPacket = 0;
+    plot(S(i).xd,S(i).yd,'bo');
+end
+S(nodes+1).xd=sink.xd;
+S(nodes+1).yd=sink.yd;
+S(nodes+1).E=1000;
+S(nodes+1).dist_BS=0;
+S(nodes+1).dist_CH=0;
+Rc=50;
+[S]=nbdetection(nodes,S,Rc);
+end
