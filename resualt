@@ -1,0 +1,47 @@
+function Ghazi_Nataej()
+global location
+close all
+nodes=200;
+networkx=100;
+networky=100;
+sink_.xd=networkx/2;
+sink_.yd=networky/2;
+roundmax=100000;
+init_energy = 0.005;
+
+
+for i=1:1:nodes
+    location(i,1)=rand*networkx;
+    location(i,2)=rand*networky;    
+end
+
+[ENERGY_PROPOSED,DEAD_PROPOSED,DELAY_PROPOSED,FND_PROPOSED,HND_PROPOSED,LND_PROPOSED]=Ghazi_Proposed(nodes,roundmax,init_energy,sink_,location,networkx);
+
+
+% PLOT ENERGY DIAGRAMS
+figure(2)
+hold off
+plot(ENERGY_PROPOSED,'g');
+hold on
+title('TREND OF ENERGY CONSUMPTION');
+legend('PROPOSED');
+% PLOT DEAD NODES DIAGRAMS
+figure (3)
+hold off
+plot(DEAD_PROPOSED,'g');
+hold on
+title('DEAD NODES');
+legend('PROPOSED');
+% PLOT DELAY DIAGRAM
+figure(4)
+hold off
+plot(DELAY_PROPOSED,'g');
+hold on
+title('TREND OF DELAY');
+legend('PROPOSED');
+% DISPLAY FNDs AND HNDs 
+figure (5)
+hold off
+bar([FND_PROPOSED HND_PROPOSED LND_PROPOSED],0.4);
+xlabel('FNDPROPOSED     HNDPROPOSED    LNDPROPOSED');
+end
