@@ -1,0 +1,60 @@
+function [Energy,DEAD,Delay,FND,HND,LND]=Ghazi_Proposed(node,it,initenergy,sink_,location,networkk)
+global data_packet
+global Rc
+global p
+global fis
+global HND
+global FND
+global sink
+global nodes
+global delayd
+global control_packet
+global EDA
+global Eelec  %energy consumed to send one bit of data
+global Efs    %energy consumed to send one bit of data
+global Emp
+global InitEnergy
+global d0
+InitEnergy = initenergy;
+HND=-1;
+FND=-1;
+LND=-1;
+delayd=0;
+data_packet=3000;
+EDA=5*0.000000001;
+Eelec=50*0.000000001;
+Efs = 10 * 0.000000000001;  %10 picojoules per bit per square meter.
+Emp = 0.0013 * 0.000000000001;  % 0.0013 picojoules per bit per square meter to the fourth power of the distance
+d0=sqrt(Efs/Emp);
+control_packet=32;
+nodes=node;
+maxround=it;
+network=networkk;
+init_energy=initenergy;
+sink.xd=sink_.xd;
+sink.yd=sink_.yd;
+Rc=20;
+Rs = Rc/2;
+brk=-1;
+p=0.1;
+fis = readfis('Ghazi_FIS');
+
+
+[S]=networkbuilder(nodes,network,init_energy,sink,location);
+DEAD(1)=0;
+Energy(1)=0;
+Delay(1)=0;
+for r=2:1:maxround
+    display(r);
+    [delay,S,C]=clustring(S,nodes,network,r);
+    [delay,S]=routing(S,C,delay);    
+    Delay(r)=Delay(r-1)+delay;
+    [S] = Sink_Location(S,nodes);
+    [S,DEAD(r),Energy(r)]=preparation_next_round(S,nodes,r,init_energy);        
+    if DEAD(r)>98*nodes/100
+        LND=r;
+        break
+    end
+%    Delay(r)=delayd;
+end
+end
