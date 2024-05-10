@@ -1,0 +1,59 @@
+function [delay,S]=routing(S,C,delay)
+global nodes
+global Rc
+global fis
+global sink
+global InitEnergy
+global data_packet
+
+for i=1:1:length(C)
+    data=S(C(i)).members*data_packet;
+    dist=S(C(i)).dist_BS;
+    S(C(i)).E=S(C(i)).E-energysend(data,dist);
+    loop=1;
+    while (loop==1)
+        loop=0;
+        max_fis=0;
+        Candidate_Next=0;
+        for j=1:1:length(C)
+            if (i~=j && S(C(j)).E>0)
+                dist_S=distancee(S(C(i)),sink);
+                dist_D=distancee(S(C(j)),sink);
+                Parameter1 = abs(1-abs((Angle_Calculation(S(C(i)),sink)-Angle_Calculation(S(C(j)),sink))/360));
+                Parameter2 = S(C(j)).E/InitEnergy;
+                Parameter3 = S(C(j)).numbernb/nodes;
+                if Parameter2<0
+                    Parameter2 = 0;
+                end
+                outfis=evalfis([Parameter1, Parameter2, Parameter3],fis);    
+                if (outfis>max_fis && dist_S>dist_D)
+                    max_fis = outfis;
+                    Candidate_Next = j;
+                end
+            end
+            %
+        end
+        if Candidate_Next==0
+            S(C(i)).next=nodes+1;
+        elseif distancee(S(C(Candidate_Next)),sink)<Rc
+            S(C(i)).next=nodes+1;
+        else
+            S(C(i)).next=C(j);
+            S(C(i)).SendPacket = S(C(i)).SendPacket +1;
+            S(C(j)).ReceivedPacket = S(C(j)).ReceivedPacket +1;
+        end        
+    end    
+end
+for i=1:1:length(C)
+    if S(C(i)).next == nodes+1
+        dist=distancee(S(C(i)),sink);
+    else
+        dist=distancee(S(C(i)),S(S(C(i)).next));
+    end
+    DataSend = S(C(i)).SendPacket * data_packet*(S(C(i)).members+1);
+    DataReceive = S(C(i)).ReceivedPacket * data_packet*(S(C(i)).members+1);
+    S(C(i)).E=S(C(i)).E-energysend(DataSend,dist);
+    S(C(i)).E=S(C(i)).E-energyreceive(DataReceive);
+    delay=caldelay(dist,DataSend)+delay;
+end
+end
