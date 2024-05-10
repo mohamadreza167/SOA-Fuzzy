@@ -1,0 +1,13 @@
+function [con]=energysend(Packet,dist)
+global Eelec
+global Emp
+global Efs
+global d0
+global delayd
+if dist<d0
+        con=Packet*Eelec+Packet*Efs*dist^2;
+else
+        con=Packet*Eelec+Packet*Emp*dist^4;
+end      
+    delayd=caldelay1(delayd,dist,Packet);
+end
