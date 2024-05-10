@@ -1,0 +1,5 @@
+function [e]=energyreceive_CH(data)
+global Eelec
+global EDA
+e=data*(Eelec+EDA);
+end
