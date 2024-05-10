@@ -1,0 +1,76 @@
+function [delay,S,CH]=clustring(S,nodes,network,r)
+global p
+global sink
+NumberofGeneration=2;
+PopulationSize = 3;
+[S,CH]=head_election_phase(NumberofGeneration,PopulationSize,r,p,S);
+delay=0;
+[S,delay]=advertisement(S,nodes,network,delay);
+[S,delay]=cluster_setup(S,nodes,delay);
+[S,delay]=aggrigate_in_CH(S,nodes,delay);
+end
+function [S,delay]=aggrigate_in_CH(S,nodes,delay)
+global data_packet
+for i=1:1:nodes
+    if strcmp(S(i).type,'cluster')
+        S(i).E=S(i).E-energyreceive_CH(data_packet*S(i).members);
+    elseif strcmp(S(i).type,'normal')
+        S(i).E=S(i).E-energysend(data_packet,S(i).dist_CH);
+        delay=caldelay(S(i).dist_CH,data_packet)+delay;
+    end
+end
+end
+function [S,delay]=cluster_setup(S,nodes,delay)
+global control_packet
+for i=1:1:nodes
+    if strcmp(S(i).type,'normal')
+        mindist=1000;
+        candidateCH=nodes+1;
+        for j=1:1:nodes
+            if strcmp(S(j).type,'cluster')
+                dist=distancee(S(i),S(j));
+                if dist<mindist
+                    mindist=dist;
+                    candidateCH=j;
+                end
+            end
+        end
+        S(i).CH=candidateCH;
+        S(i).dist_CH=mindist;
+        % final setup
+        S(i).E=S(i).E-energysend(control_packet,mindist);
+        delay=caldelay(mindist,control_packet)+delay;
+        S(candidateCH).E=S(candidateCH).E-energyreceive(control_packet);
+        S(candidateCH).Receive_Packet = S(candidateCH).Receive_Packet +1;
+        
+%        plot([S(i).xd S(candidateCH).xd],[S(i).yd S(candidateCH).yd])
+    end
+end
+for i=1:1:nodes
+    S(i).members=1;
+    if strcmp(S(i).type,'cluster')        
+        for j=1:1:nodes
+            if strcmp(S(j).type,'normal')
+                if S(j).CH==i
+                    S(i).members=S(i).members+1;                    
+                end
+            end
+        end
+    end
+end
+end
+function [S,delay]=advertisement(S,nodes,network,delay)
+global control_packet
+advertisementdist=sqrt(network^2 + network^2)/2;
+for i=1:1:nodes
+    if strcmp(S(i).type,'cluster')
+        S(i).E=S(i).E-energysend(control_packet,advertisementdist);
+        delay=caldelay(advertisementdist,control_packet)+delay;
+        for j=1:1:nodes
+            if distancee(S(i),S(j))<advertisementdist
+                S(j).E=S(j).E-energyreceive(control_packet);
+            end
+        end
+    end
+end
+end
