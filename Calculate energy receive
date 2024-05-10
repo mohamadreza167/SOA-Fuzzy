@@ -1,0 +1,4 @@
+function [e]=energyreceive(data)
+global Eelec
+e=data*Eelec;
+end
