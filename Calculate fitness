@@ -1,0 +1,61 @@
+function fit=calculation_fitness(pop,S)
+global control_packet
+global data_packet
+fit=0;
+testS=S;
+nodes=length(testS)-1;
+for i=1:1:nodes
+    if pop(i)==1
+        testS(i).type='cluster';
+    elseif pop(i)==0
+        testS(i).type='member';
+    else
+        testS(i).type='dead';
+    end
+end
+for i=1:1:nodes
+    if strcmp(testS(i).type,'member')
+        mindist=1000;
+        candidateCH=nodes+1;
+        for j=1:1:nodes
+            if strcmp(testS(j).type,'cluster')
+                dist=distancee(testS(i),testS(j));
+                if dist<mindist
+                    mindist=dist;
+                    candidateCH=j;
+                end
+            end
+        end
+        testS(i).CH=candidateCH;
+        testS(i).dist_CH=mindist;
+        % final setup
+        testS(i).E=testS(i).E-energysend(control_packet,mindist);
+        %fit=fit+energysend(control_packet,mindist);
+        fit=fit+energysend(data_packet,mindist);
+        testS(candidateCH).E=testS(candidateCH).E-energyreceive(control_packet);
+        %fit=fit+energyreceive(control_packet);
+        %fit=fit+energyreceive(data_packet);
+        %plot([testS(i).xd testS(candidateCH).xd],[testS(i).yd testS(candidateCH).yd])
+    end
+end
+for i=1:1:nodes
+    testS(i).members=1;
+    if strcmp(testS(i).type,'cluster')        
+        for j=1:1:nodes
+            if strcmp(testS(j).type,'member')
+                if testS(j).CH==i
+                    testS(i).members=testS(i).members+1;                    
+                end
+            end
+        end
+        if testS(i).members>1
+            fit=fit+energysend((testS(i).members*data_packet)*0.1,S(i).dist_BS);
+        else
+            fit=fit+energysend(data_packet,S(i).dist_BS);
+        end
+    end
+end
+if fit==0
+    fit=10000;
+end
+end
