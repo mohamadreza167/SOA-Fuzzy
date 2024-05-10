@@ -1,0 +1,25 @@
+function [S]=nbdetection(nodes,S,Rc)
+for i=1:1:nodes
+    w=0;
+    for j=1:1:nodes
+        if i~=j && distancee(S(i),S(j))<Rc
+            w=w+1;
+            S(i).nb(w)=j;
+        end
+    end
+    S(i).numbernb=w;
+end
+for i=1:1:nodes
+    avg.xd=0;
+    avg.yd=0;
+    for j=1:1:S(i).numbernb
+        avg.xd=S(S(i).nb(j)).xd+avg.xd;
+        avg.yd=S(S(i).nb(j)).yd+avg.yd;
+    end
+    if avg.xd~=0
+        avg.xd=avg.xd/S(i).numbernb;
+        avg.yd=avg.yd/S(i).numbernb;
+        S(i).centrality=distancee(S(i),avg);
+    end
+end
+end
