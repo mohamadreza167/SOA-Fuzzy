@@ -1,0 +1,8 @@
+function [DIFF]=Difference_Fitness(Fitness)
+DIFF=0;
+for i=1:1:length(Fitness)
+    for j=1:1:length(Fitness)
+        DIFF=DIFF+abs(Fitness(i)-Fitness(j));
+    end
+end
+end
