@@ -1,0 +1,69 @@
+function [S,CH]=head_election_phase(NumberofGeneration,PopulationSize,r,p,S)
+global nodes
+numberofSnake = PopulationSize;
+maxIteration = NumberofGeneration;
+step = 0;
+Ub = 1;
+Lb = 0;
+epsilon = 0.00000001;  % convergence threshold to decide if the optimization has sufficiently progressed.
+rho = 0.5; % % threshold for some decision-making
+sigma = 0.2; % % scaling factor for perturbing the snake's position
+for i = 1:numberofSnake  %position of each snake
+    Snake(i,:) = round(Lb + (Ub - Lb) .* rand(1,nodes)); 
+    Fitness(i) = calculation_fitness(Snake(i,:), S);
+end
+gbest = rand(1,nodes);
+Fit_gbest=0;
+while (step < maxIteration)
+    display(step)
+    step = step + 1;
+    for i = 1:numberofSnake        
+        direction = randn(1, nodes); %Sets the direction of movement to the best known position
+        for j = 1:nodes
+            if rand() < rho
+                direction(j) = gbest(j) - Snake(i,j); %Sets the direction of movement to the best known position 
+            end
+        end
+        
+        % ???? ???
+        temp = Snake(i,:) + sigma * direction;
+        Snake(i,:) = round(Normalize(temp));
+        
+        Fit_S(i) = calculation_fitness(Snake(i,:), S);
+             
+        if Fit_S(i) > Fit_gbest
+            gbest = Snake(i,:);
+            Fit_gbest = Fit_S(i);
+        end
+    end
+    
+    diff = Difference_Fitness(Fit_S);
+    if diff < epsilon
+        break;
+    end
+end
+global nodes
+    global sink
+    threshold=p/(1-p*(mod(r,1/p )));
+    number_of_cluster=0;
+    w=0;
+    for i=1:1:nodes
+        random=rand(1,1);
+        if  random<threshold && S(i).Head_in_round <= r-1/p && ~strcmp(S(i).type,'dead') 
+            w=w+1;  
+            S(i).type='cluster';
+              CH(w)=i;
+              S(i).dist_to_BS=distancee(S(i),sink);
+              S(i).Head_in_round=r;
+              number_of_cluster=number_of_cluster+1;
+        end       
+    end
+    if w==0
+        for i=1:1:10
+        CH(i)=ceil(rand*nodes);
+        S(CH(i)).Head_in_round=r;
+        S(CH(i)).type='cluster';
+        number_of_cluster=number_of_cluster+1;
+        end
+    end
+end
